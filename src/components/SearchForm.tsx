@@ -3,7 +3,7 @@ import { Station } from '../types';
 import { RouteService } from '../services/routeService';
 
 interface SearchFormProps {
-  onSearch: (fromId: string, toId: string, dayOfWeek: 'weekday' | 'weekend', time: string) => void;
+  onSearch: (fromIdOrName: string, toIdOrName: string, dayOfWeek: 'weekday' | 'weekend', time: string) => void;
 }
 
 export const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
@@ -56,13 +56,23 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 入力値変更時のサジェストフィルタリング
+  // 入力値変更時のサジェストフィルタリングと駅特定
   const handleFromChange = (val: string) => {
     setFromInput(val);
     if (!val.trim()) {
       setFromSuggestions([]);
+      setSelectedFrom(null);
       return;
     }
+    
+    // 完全一致する駅名があればセット
+    const matched = stations.find(s => s.name === val || s.nameEn.toLowerCase() === val.toLowerCase());
+    if (matched) {
+      setSelectedFrom(matched);
+    } else {
+      setSelectedFrom(null); // 自由入力
+    }
+
     const filtered = stations.filter(s =>
       s.name.includes(val) || s.nameEn.toLowerCase().includes(val.toLowerCase())
     );
@@ -73,8 +83,17 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
     setToInput(val);
     if (!val.trim()) {
       setToSuggestions([]);
+      setSelectedTo(null);
       return;
     }
+
+    const matched = stations.find(s => s.name === val || s.nameEn.toLowerCase() === val.toLowerCase());
+    if (matched) {
+      setSelectedTo(matched);
+    } else {
+      setSelectedTo(null); // 自由入力
+    }
+
     const filtered = stations.filter(s =>
       s.name.includes(val) || s.nameEn.toLowerCase().includes(val.toLowerCase())
     );
@@ -139,11 +158,21 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
   // 検索実行
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFrom || !selectedTo) {
-      alert('出発駅と目的地駅を選択してください。');
+    if (!fromInput.trim() || !toInput.trim()) {
+      alert('出発駅と目的地駅を入力してください。');
       return;
     }
-    onSearch(selectedFrom.id, selectedTo.id, dayOfWeek, time);
+
+    // マスターデータになければ、手入力された文字列そのものを渡す
+    const fromVal = selectedFrom ? selectedFrom.id : fromInput.trim();
+    const toVal = selectedTo ? selectedTo.id : toInput.trim();
+
+    if (fromVal === toVal) {
+      alert('出発駅と目的地駅が同じです。異なる駅を入力してください。');
+      return;
+    }
+
+    onSearch(fromVal, toVal, dayOfWeek, time);
   };
 
   // 入力を入れ替える
@@ -171,7 +200,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
                 type="text"
                 value={fromInput}
                 onChange={(e) => handleFromChange(e.target.value)}
-                placeholder="駅名を入力（例: 東京）"
+                placeholder="駅名を入力（JR東日本のすべての駅）"
                 className="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold text-slate-800 placeholder-slate-400 text-sm shadow-sm transition-all"
               />
               <span className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-blue-500 font-bold text-base">●</span>
@@ -215,7 +244,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
             )}
           </div>
 
-          {/* 入れ替えボタン (PCでは真ん中、スマホでは上下の間) */}
+          {/* 入れ替えボタン */}
           <div className="flex items-center justify-center my-1 md:my-0 md:pt-5">
             <button
               type="button"
@@ -236,7 +265,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
                 type="text"
                 value={toInput}
                 onChange={(e) => handleToChange(e.target.value)}
-                placeholder="駅名を入力（例: 渋谷）"
+                placeholder="駅名を入力（例: 仙台、熱海、いわき）"
                 className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold text-slate-800 placeholder-slate-400 text-sm shadow-sm transition-all"
               />
               <span className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-rose-500 font-bold text-base">■</span>

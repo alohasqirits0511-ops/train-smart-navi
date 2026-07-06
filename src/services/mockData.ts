@@ -1,7 +1,8 @@
 import { Station, CarDetail, CrowdLevel, RouteOption } from '../types';
 
-// 主要な駅の定義（山手線を中心としたモック）
+// 主要な駅の定義（JR東日本管轄の主要駅・ターミナル）
 export const STATIONS: Station[] = [
+  // 山手線・都心主要駅
   { id: 'tokyo', name: '東京', nameEn: 'Tokyo', line: '山手線', lat: 35.681236, lng: 139.767125 },
   { id: 'akihabara', name: '秋葉原', nameEn: 'Akihabara', line: '山手線', lat: 35.698383, lng: 139.773072 },
   { id: 'ueno', name: '上野', nameEn: 'Ueno', line: '山手線', lat: 35.713768, lng: 139.777254 },
@@ -10,31 +11,55 @@ export const STATIONS: Station[] = [
   { id: 'shibuya', name: '渋谷', nameEn: 'Shibuya', line: '山手線', lat: 35.658034, lng: 139.701636 },
   { id: 'shinagawa', name: '品川', nameEn: 'Shinagawa', line: '山手線', lat: 35.628471, lng: 139.73876 },
   { id: 'shimbashi', name: '新橋', nameEn: 'Shimbashi', line: '山手線', lat: 35.666495, lng: 139.758368 },
+
+  // 首都圏郊外主要ターミナル
+  { id: 'omiya', name: '大宮', nameEn: 'Omiya', line: '京浜東北線', lat: 35.906295, lng: 139.623999 },
+  { id: 'urawa', name: '浦和', nameEn: 'Urawa', line: '京浜東北線', lat: 35.858231, lng: 139.657152 },
+  { id: 'akabane', name: '赤羽', nameEn: 'Akabane', line: '京浜東北線', lat: 35.777675, lng: 139.720979 },
+  { id: 'yokohama', name: '横浜', nameEn: 'Yokohama', line: '東海道線', lat: 35.465786, lng: 139.622299 },
+  { id: 'kawasaki', name: '川崎', nameEn: 'Kawasaki', line: '京浜東北線', lat: 35.531393, lng: 139.696898 },
+  { id: 'chiba', name: '千葉', nameEn: 'Chiba', line: '総武線', lat: 35.613375, lng: 140.113066 },
+  { id: 'funabashi', name: '船橋', nameEn: 'Funabashi', line: '総武線', lat: 35.701662, lng: 139.98544 },
+  { id: 'hachioji', name: '八王子', nameEn: 'Hachioji', line: '中央線', lat: 35.655554, lng: 139.338998 },
+  { id: 'tachikawa', name: '立川', nameEn: 'Tachikawa', line: '中央線', lat: 35.698226, lng: 139.413725 },
+
+  // 地方主要ターミナル (JR東日本管轄)
+  { id: 'sendai', name: '仙台', nameEn: 'Sendai', line: '東北本線', lat: 38.260126, lng: 140.882437 },
+  { id: 'niigata', name: '新潟', nameEn: 'Niigata', line: '信越本線', lat: 37.912173, lng: 139.06173 },
+  { id: 'morioka', name: '盛岡', nameEn: 'Morioka', line: '東北本線', lat: 39.701633, lng: 141.136284 }
 ];
 
-// 山手線外回りの順序 (東京 -> 秋葉原 -> 上野 -> 池袋 -> 新宿 -> 渋谷 -> 品川 -> 新橋 -> 東京)
-const YAMANOTE_OUTER_ORDER = [
-  'tokyo',
-  'akihabara',
-  'ueno',
-  'ikebukuro',
-  'shinjuku',
-  'shibuya',
-  'shinagawa',
-  'shimbashi'
-];
-
-// 駅間の標準所要時間（分）
-const STATION_INTERVALS: { [key: string]: number } = {
-  'tokyo-akihabara': 4,
-  'akihabara-ueno': 3,
-  'ueno-ikebukuro': 16,
-  'ikebukuro-shinjuku': 9,
-  'shinjuku-shibuya': 6,
-  'shibuya-shinagawa': 12,
-  'shinagawa-shimbashi': 8,
-  'shimbashi-tokyo': 4,
+// JR東日本の主要路線と、それに属する駅の順序定義 (簡易ネットワーク経路検索用)
+export const LINE_STATIONS: { [lineName: string]: string[] } = {
+  '山手線': ['shinagawa', 'shibuya', 'shinjuku', 'ikebukuro', 'ueno', 'akihabara', 'tokyo', 'shimbashi', 'shinagawa'],
+  '京浜東北線': ['omiya', 'urawa', 'akabane', 'ueno', 'akihabara', 'tokyo', 'shimbashi', 'shinagawa', 'kawasaki', 'yokohama'],
+  '中央線': ['hachioji', 'tachikawa', 'shinjuku', 'tokyo'],
+  '総武線': ['shinjuku', 'akihabara', 'funabashi', 'chiba'],
+  '湘南新宿ライン': ['omiya', 'akabane', 'ikebukuro', 'shinjuku', 'shibuya', 'yokohama']
 };
+
+// 路線ごとの表示カラー (Tailwind CSSクラス)
+export const LINE_COLORS: { [lineName: string]: string } = {
+  '山手線': 'bg-lime-600',
+  '京浜東北線': 'bg-sky-500',
+  '中央線': 'bg-orange-500',
+  '総武線': 'bg-yellow-400 text-slate-800',
+  '湘南新宿ライン': 'bg-emerald-600',
+  '東北本線': 'bg-green-600',
+  '信越本線': 'bg-blue-600',
+  'JR東日本 快速': 'bg-blue-600',
+  'JR東日本 在来線': 'bg-slate-600',
+  '東北新幹線': 'bg-emerald-700'
+};
+
+// 文字列から決定論的なハッシュ値を生成する (モックデータ自動生成用)
+function getHashCode(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return Math.abs(hash);
+}
 
 // 曜日と時間帯から混雑レベルを推定する
 export function estimateBaseCrowdLevel(dayOfWeek: 'weekday' | 'weekend', timeStr: string): CrowdLevel {
@@ -50,15 +75,13 @@ export function estimateBaseCrowdLevel(dayOfWeek: 'weekday' | 'weekend', timeStr
     if ((hour === 17 && parseInt(minStr, 10) >= 30) || hour === 18 || (hour === 19 && parseInt(minStr, 10) <= 30)) {
       return 'crowded';
     }
-    // 深夜帯 (23:00 - 24:59) もそこそこ混む
+    // 深夜帯 (23:00 - 24:59)
     if (hour >= 23 || hour <= 1) {
       return 'normal';
     }
-    // 日中は比較的空いている
     return 'empty';
   } else {
-    // 休日
-    // 日中 (11:00 - 18:00) はそこそこ混む
+    // 休日 (11:00 - 18:00 は普通に混む)
     if (hour >= 11 && hour <= 18) {
       return 'normal';
     }
@@ -66,130 +89,63 @@ export function estimateBaseCrowdLevel(dayOfWeek: 'weekday' | 'weekend', timeStr
   }
 }
 
-// 特定の駅に到着する際のおすすめ車両情報を取得する
-// 山手線は11両編成 (1号車〜11号車)
-// 1号車が品川・東京方面（内回り先頭）、11号車が池袋・上野方面（外回り先頭）
+// 駅名ハッシュを利用して、どの駅に対しても一貫性のある「車両おすすめ情報」を動的生成する
 export function getCarDetailsForArrival(
-  toStationId: string,
+  toStationName: string,
   baseCrowd: CrowdLevel
 ): CarDetail[] {
   const details: CarDetail[] = [];
+  const hash = getHashCode(toStationName);
 
-  // 駅ごとの特徴的な設備のある車両番号（仮データ）
-  // 1〜11号車の設備マップ
-  const stationFeatures: {
-    [key: string]: {
-      stairs?: number[];
-      escalator?: number[];
-      elevator?: number[];
-      exit?: number[];
-      transfer?: number[];
-    };
-  } = {
-    tokyo: {
-      stairs: [3, 8],
-      escalator: [4, 9],
-      elevator: [5],
-      exit: [1, 2, 10],
-      transfer: [3, 4, 7, 8], // 中央線、東海道線などへの乗り換え
-    },
-    akihabara: {
-      stairs: [2, 9],
-      escalator: [3, 8],
-      elevator: [6],
-      exit: [1, 11],
-      transfer: [3, 4, 9], // 総武線、つくばエクスプレスなど
-    },
-    ueno: {
-      stairs: [3, 7],
-      escalator: [4, 8],
-      elevator: [5],
-      exit: [2, 11],
-      transfer: [3, 4, 7], // 新幹線、常磐線など
-    },
-    ikebukuro: {
-      stairs: [2, 8, 10],
-      escalator: [3, 9, 11],
-      elevator: [6],
-      exit: [1, 8, 11],
-      transfer: [2, 3, 8, 9], // 丸ノ内線、西武線、東武線
-    },
-    shinjuku: {
-      stairs: [4, 7, 9],
-      escalator: [5, 8, 10],
-      elevator: [6],
-      exit: [1, 2, 7, 8, 11],
-      transfer: [4, 5, 7, 8], // 中央線、小田急、京王など
-    },
-    shibuya: {
-      stairs: [1, 6, 9],
-      escalator: [2, 7, 10],
-      elevator: [5],
-      exit: [1, 8, 11], // ハチ公口は1号車、スクランブルスクエア側は中程
-      transfer: [1, 2, 8], // 半蔵門線、副都心線、東急線
-    },
-    shinagawa: {
-      stairs: [3, 8],
-      escalator: [4, 9],
-      elevator: [6],
-      exit: [1, 10],
-      transfer: [3, 4, 8, 9], // 新幹線、京急線
-    },
-    shimbashi: {
-      stairs: [2, 8],
-      escalator: [3, 7],
-      elevator: [5],
-      exit: [1, 10, 11],
-      transfer: [3, 8], // 浅草線、ゆりかもめ
-    },
-  };
-
-  const features = stationFeatures[toStationId] || stationFeatures['tokyo'];
+  // 1〜11号車の設備を決定論的に割り当てる
+  // ハッシュコードの余りを利用して設備を配置
+  const stairCars = [((hash % 11) + 1), (((hash + 3) % 11) + 1)];
+  const escalatorCars = [(((hash + 1) % 11) + 1), (((hash + 7) % 11) + 1)];
+  const elevatorCars = [(((hash + 5) % 11) + 1)];
+  const exitCars = [(((hash + 2) % 11) + 1), (((hash + 9) % 11) + 1)];
+  const transferCars = [(((hash + 4) % 11) + 1), (((hash + 8) % 11) + 1)];
 
   for (let carNum = 1; carNum <= 11; carNum++) {
     const carFeatures: CarDetail['features'] = [];
 
-    if (features.stairs?.includes(carNum)) {
+    if (stairCars.includes(carNum)) {
       carFeatures.push({ type: 'stairs', description: '階段が近いです' });
     }
-    if (features.escalator?.includes(carNum)) {
+    if (escalatorCars.includes(carNum)) {
       carFeatures.push({ type: 'escalator', description: 'エスカレーターが近いです' });
     }
-    if (features.elevator?.includes(carNum)) {
+    if (elevatorCars.includes(carNum)) {
       carFeatures.push({ type: 'elevator', description: 'エレベーターが近いです' });
     }
-    if (features.exit?.includes(carNum)) {
+    if (exitCars.includes(carNum)) {
       carFeatures.push({ type: 'exit', description: '出口改札が近いです' });
     }
-    if (features.transfer?.includes(carNum)) {
+    if (transferCars.includes(carNum)) {
       carFeatures.push({ type: 'transfer', description: '乗り換え連絡通路が近いです' });
     }
 
-    // 車両固有の混雑レベルの補正
-    // 一般的に階段やエスカレーターが近い車両(中程)は混みやすく、端(1号車や11号車など)や設備のない車両は比較的空いている
+    // 混雑度の決定論的補正
     let crowdLevel: CrowdLevel = baseCrowd;
+    const isHeavyFeature = carFeatures.some(f => f.type === 'stairs' || f.type === 'escalator' || f.type === 'transfer');
+
     if (baseCrowd === 'crowded') {
-      // 激混み時間帯：階段付近は「激混み(crowded)」のまま、端の車両は「普通(normal)」に緩和される可能性
-      if (carFeatures.length === 0 && (carNum <= 2 || carNum >= 10)) {
-        crowdLevel = 'normal';
+      if (!isHeavyFeature && (carNum <= 2 || carNum >= 10)) {
+        crowdLevel = 'normal'; // 端の車両は少し空いている
       }
     } else if (baseCrowd === 'normal') {
-      // 普通時間帯：設備付近は「混雑(crowded)」になりやすく、端は「空いている(empty)」になりやすい
-      if (carFeatures.some(f => f.type === 'stairs' || f.type === 'escalator' || f.type === 'transfer')) {
-        crowdLevel = 'crowded';
-      } else if (carFeatures.length === 0 && (carNum <= 2 || carNum >= 10)) {
-        crowdLevel = 'empty';
+      if (isHeavyFeature) {
+        crowdLevel = 'crowded'; // 階段付近は混雑
+      } else if (carNum <= 2 || carNum >= 10) {
+        crowdLevel = 'empty'; // 端はガラガラ
       }
     } else {
-      // 空いている時間帯：設備付近でもせいぜい「普通(normal)」、端は「空いている(empty)」
-      if (carFeatures.some(f => f.type === 'stairs' || f.type === 'escalator')) {
+      if (isHeavyFeature) {
         crowdLevel = 'normal';
       } else {
         crowdLevel = 'empty';
       }
     }
 
-    // 特に設備がない場合は none
     if (carFeatures.length === 0) {
       carFeatures.push({ type: 'none', description: '比較的空いている車両です' });
     }
@@ -202,123 +158,6 @@ export function getCarDetailsForArrival(
   }
 
   return details;
-}
-
-// 簡易的な経路計算（外回りと内回りの両方の経路を提示する）
-export function getMockRoutes(
-  fromId: string,
-  toId: string,
-  dayOfWeek: 'weekday' | 'weekend',
-  timeStr: string
-): RouteOption[] {
-  const fromIndex = YAMANOTE_OUTER_ORDER.indexOf(fromId);
-  const toIndex = YAMANOTE_OUTER_ORDER.indexOf(toId);
-
-  if (fromIndex === -1 || toIndex === -1 || fromId === toId) {
-    return [];
-  }
-
-  const baseCrowd = estimateBaseCrowdLevel(dayOfWeek, timeStr);
-  const options: RouteOption[] = [];
-
-  // --- パターン1: 外回り (Outer Loop) ---
-  const outerSegments: string[] = [];
-  let currentIdx = fromIndex;
-  let outerDuration = 0;
-
-  while (currentIdx !== toIndex) {
-    const nextIdx = (currentIdx + 1) % YAMANOTE_OUTER_ORDER.length;
-    const currentStationId = YAMANOTE_OUTER_ORDER[currentIdx];
-    const nextStationId = YAMANOTE_OUTER_ORDER[nextIdx];
-    const key = `${currentStationId}-${nextStationId}`;
-    const reverseKey = `${nextStationId}-${currentStationId}`;
-    
-    const intervalTime = STATION_INTERVALS[key] || STATION_INTERVALS[reverseKey] || 3;
-    outerDuration += intervalTime;
-    outerSegments.push(currentStationId);
-    currentIdx = nextIdx;
-  }
-  outerSegments.push(YAMANOTE_OUTER_ORDER[toIndex]);
-
-  // --- パターン2: 内回り (Inner Loop) ---
-  const innerSegments: string[] = [];
-  currentIdx = fromIndex;
-  let innerDuration = 0;
-
-  while (currentIdx !== toIndex) {
-    const nextIdx = (currentIdx - 1 + YAMANOTE_OUTER_ORDER.length) % YAMANOTE_OUTER_ORDER.length;
-    const currentStationId = YAMANOTE_OUTER_ORDER[currentIdx];
-    const nextStationId = YAMANOTE_OUTER_ORDER[nextIdx];
-    const key = `${nextStationId}-${currentStationId}`;
-    const reverseKey = `${currentStationId}-${nextStationId}`;
-    
-    const intervalTime = STATION_INTERVALS[key] || STATION_INTERVALS[reverseKey] || 3;
-    innerDuration += intervalTime;
-    innerSegments.push(currentStationId);
-    currentIdx = nextIdx;
-  }
-  innerSegments.push(YAMANOTE_OUTER_ORDER[toIndex]);
-
-  // 曜日・時間から出発時刻をパース
-  const [hourStr, minStr] = timeStr.split(':');
-  const startHour = parseInt(hourStr, 10);
-  const startMin = parseInt(minStr, 10);
-
-  // 到着時間の計算ヘルパー
-  const formatTimePlusMinutes = (h: number, m: number, addMins: number): string => {
-    const totalMins = h * 60 + m + addMins;
-    const finalHour = Math.floor(totalMins / 60) % 24;
-    const finalMin = totalMins % 60;
-    return `${String(finalHour).padStart(2, '0')}:${String(finalMin).padStart(2, '0')}`;
-  };
-
-  // 外回りのルート生成
-  const fromStation = STATIONS.find(s => s.id === fromId)!;
-  const toStation = STATIONS.find(s => s.id === toId)!;
-
-  options.push({
-    id: 'outer-loop',
-    totalDurationMinutes: outerDuration,
-    transferCount: 0,
-    startTime: timeStr,
-    endTime: formatTimePlusMinutes(startHour, startMin, outerDuration),
-    segments: [
-      {
-        id: 'yamanote-outer',
-        lineName: '山手線 (外回り)',
-        lineColor: 'bg-green-600',
-        fromStation,
-        toStation,
-        durationMinutes: outerDuration,
-        crowdLevel: baseCrowd,
-        carDetails: getCarDetailsForArrival(toId, baseCrowd),
-      },
-    ],
-  });
-
-  // 内回りのルート生成
-  options.push({
-    id: 'inner-loop',
-    totalDurationMinutes: innerDuration,
-    transferCount: 0,
-    startTime: timeStr,
-    endTime: formatTimePlusMinutes(startHour, startMin, innerDuration),
-    segments: [
-      {
-        id: 'yamanote-inner',
-        lineName: '山手線 (内回り)',
-        lineColor: 'bg-green-700',
-        fromStation,
-        toStation,
-        durationMinutes: innerDuration,
-        crowdLevel: baseCrowd,
-        carDetails: getCarDetailsForArrival(toId, baseCrowd),
-      },
-    ],
-  });
-
-  // 時間が短い方を先頭にする
-  return options.sort((a, b) => a.totalDurationMinutes - b.totalDurationMinutes);
 }
 
 // 2つの座標間の距離（km）をハバーサインの公式で計算
@@ -350,4 +189,132 @@ export function findNearestStation(lat: number, lng: number): Station {
   }
 
   return nearest;
+}
+
+// 経路検索の主ロジック (JR東日本拡張シミュレータ)
+export function getMockRoutes(
+  fromIdOrName: string,
+  toIdOrName: string,
+  dayOfWeek: 'weekday' | 'weekend',
+  timeStr: string
+): RouteOption[] {
+  // 入力が ID か 駅名 かを判別
+  let fromStation = STATIONS.find(s => s.id === fromIdOrName || s.name === fromIdOrName);
+  let toStation = STATIONS.find(s => s.id === toIdOrName || s.name === toIdOrName);
+
+  // もしマスターデータに登録がなければ、動的に「カスタム駅」を作成する (JR東日本管轄全駅対応)
+  if (!fromStation) {
+    const hash = getHashCode(fromIdOrName);
+    // 東京駅の座標付近に適当にオフセット
+    const offsetLat = ((hash % 100) - 50) / 1000;
+    const offsetLng = (((hash + 13) % 100) - 50) / 1000;
+    fromStation = {
+      id: `custom-${hash}`,
+      name: fromIdOrName,
+      nameEn: `Station-${hash}`,
+      line: 'JR東日本 在来線',
+      lat: 35.681236 + offsetLat,
+      lng: 139.767125 + offsetLng
+    };
+  }
+
+  if (!toStation) {
+    const hash = getHashCode(toIdOrName);
+    const offsetLat = ((hash % 100) - 50) / 1000;
+    const offsetLng = (((hash + 13) % 100) - 50) / 1000;
+    toStation = {
+      id: `custom-${hash}`,
+      name: toIdOrName,
+      nameEn: `Station-${hash}`,
+      line: 'JR東日本 在来線',
+      lat: 35.681236 + offsetLat,
+      lng: 139.767125 + offsetLng
+    };
+  }
+
+  if (fromStation.name === toStation.name) {
+    return [];
+  }
+
+  const baseCrowd = estimateBaseCrowdLevel(dayOfWeek, timeStr);
+  const distance = getDistanceKm(fromStation.lat, fromStation.lng, toStation.lat, toStation.lng);
+  
+  // 決定論的に所要時間を計算 (速さは時速 40km 程度と仮定して、最小5分)
+  const duration = Math.max(5, Math.round((distance / 40) * 60 + 3));
+
+  const [hourStr, minStr] = timeStr.split(':');
+  const startHour = parseInt(hourStr, 10);
+  const startMin = parseInt(minStr, 10);
+
+  const formatTimePlusMinutes = (h: number, m: number, addMins: number): string => {
+    const totalMins = h * 60 + m + addMins;
+    const finalHour = Math.floor(totalMins / 60) % 24;
+    const finalMin = totalMins % 60;
+    return `${String(finalHour).padStart(2, '0')}:${String(finalMin).padStart(2, '0')}`;
+  };
+
+  // 1. 直通ルート
+  // 路線名を推定。駅の元路線が共通していればそれを使う。
+  let matchedLine = 'JR東日本 在来線';
+  if (fromStation.line === toStation.line && fromStation.line !== 'JR東日本 在来線') {
+    matchedLine = fromStation.line;
+  } else {
+    // 登録された路線マスターから、両方の駅が含まれている路線を探す
+    for (const [lineName, stationsList] of Object.entries(LINE_STATIONS)) {
+      if (stationsList.includes(fromStation.id) && stationsList.includes(toStation.id)) {
+        matchedLine = lineName;
+        break;
+      }
+    }
+  }
+
+  const routes: RouteOption[] = [];
+
+  // ルートオプション1: 直通ルート、もしくは標準快速ルート
+  routes.push({
+    id: `route-direct-${fromStation.id}-${toStation.id}`,
+    totalDurationMinutes: duration,
+    transferCount: 0,
+    startTime: timeStr,
+    endTime: formatTimePlusMinutes(startHour, startMin, duration),
+    segments: [
+      {
+        id: `seg-1-${fromStation.id}-${toStation.id}`,
+        lineName: matchedLine,
+        lineColor: LINE_COLORS[matchedLine] || 'bg-slate-600',
+        fromStation,
+        toStation,
+        durationMinutes: duration,
+        crowdLevel: baseCrowd,
+        carDetails: getCarDetailsForArrival(toStation.name, baseCrowd),
+      }
+    ]
+  });
+
+  // ルートオプション2: 遠回り or 各駅停車 (距離がある場合のみ提示)
+  if (distance > 8) {
+    const route2Duration = Math.round(duration * 1.3);
+    const line2 = matchedLine === '山手線' ? '山手線' : 'JR東日本 快速';
+    routes.push({
+      id: `route-local-${fromStation.id}-${toStation.id}`,
+      totalDurationMinutes: route2Duration,
+      transferCount: 0,
+      startTime: timeStr,
+      endTime: formatTimePlusMinutes(startHour, startMin, route2Duration),
+      segments: [
+        {
+          id: `seg-2-${fromStation.id}-${toStation.id}`,
+          lineName: `${line2} (各駅停車)`,
+          lineColor: 'bg-slate-600',
+          fromStation,
+          toStation,
+          durationMinutes: route2Duration,
+          crowdLevel: baseCrowd === 'crowded' ? 'normal' : 'empty', // 各駅は比較的空いている傾向
+          carDetails: getCarDetailsForArrival(toStation.name, baseCrowd === 'crowded' ? 'normal' : 'empty'),
+        }
+      ]
+    });
+  }
+
+  return routes.sort((a, b) => a.totalDurationMinutes - b.totalDurationMinutes);
 }
