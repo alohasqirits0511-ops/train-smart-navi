@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TrainSmart Navi
 
-## Getting Started
+電車移動時に「どの車両に乗れば空いているか」「どの車両に乗れば乗り換え・出口・階段・エスカレーターに近いか」を瞬時に表示し、最適な移動経路と乗車位置を案内するWebアプリケーションです。
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🌟 主な機能
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 1. 現在地からの最寄り駅特定 (Geolocation API)
+* ブラウザの位置情報（Geolocation API）を利用して現在地の緯度・経度を取得。
+* 山手線の駅の中で現在地に最も近い駅を自動的に割り出し、「出発駅」に自動セットします。
+* 位置情報の取得に失敗した場合や拒否された場合は、スムーズに手動入力での駅検索へフォールバックします。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 2. インテリジェント駅名検索 (オートサジェスト付き)
+* 入力フォームに駅名（漢字または英字）を入力すると、前方一致・部分一致で即座に該当駅をサジェスト。
+* ドロップダウンから直感的に駅を選択できます。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. 車両別おすすめ乗車位置のグラフィカル表示 (電車型UI)
+* 11両編成（山手線の基本編成）の電車を表現したビジュアルを搭載。
+* 各車両ごとに、到着駅での近接設備（**階段・エスカレーター・エレベーター・出口改札・乗り換え連絡通路**）をアイコンで分かりやすく配置。
+* 「空いている車両」「出口・乗り換え優先」「エレベーター優先」といった目的別のクイックフィルター機能により、瞬時におすすめ車両を特定できます。
 
-## Learn More
+### 4. 曜日・時間帯別 混雑推定エンジン
+* 曜日（平日・土休日）と乗車時刻（朝ラッシュ、夕方ラッシュ、日中、深夜など）に基づき、路線の基本混雑度を3段階（空いている・普通・混雑）で算出。
+* さらに、「階段やエスカレーターに近い車両は混雑しやすい」「端の車両は比較的空いている」といった傾向を加味し、車両ごとの混雑レベルを動的に補正・表示します。
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠 技術スタック
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+* **フレームワーク**: Next.js 15 (App Router)
+* **言語**: TypeScript
+* **スタイリング**: Tailwind CSS v4
+* **デプロイ想定**: Vercel
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🚀 使い方（ローカル起動手順）
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. 必要なパッケージのインストール
+   ```bash
+   npm install
+   ```
+
+2. 開発用サーバーの起動
+   ```bash
+   npm run dev
+   ```
+   ブラウザで `http://localhost:3000` を開きます。
+
+3. アプリケーションのビルド（本番用検証）
+   ```bash
+   npm run build
+   ```
+
+---
+
+## 🔮 将来の拡張計画（API連携ロードマップ）
+
+初期版ではモックデータと簡易推定ロジックで実装されていますが、データ層とUI層を `services/routeService.ts` で完全に分離しているため、以下のAPIを接続することでリアルタイムデータへ容易に差し替え可能です。
+
+1. **公共交通オープンデータセンター (ODPT API)**
+   * 東京メトロや都営地下鉄、JR東日本などのリアルタイムの列車位置・運行情報、および駅施設情報（階段・エスカレーター・改札と車両位置の対応情報）を取得可能。
+2. **GTFS-RT (Realtime) データ**
+   * オープンな交通データ規格に対応する国内外の路線の運行状況や混雑統計データを取得可能。
+3. **鉄道各社公式API / SDK**
+   * 列車の車両別混雑度データが提供されている場合（例: 東京都交通局、JR東日本アプリ等）、そのAPIと連携してリアルタイムな混雑率をビジュアルへ反映します。
+4. **ユーザー投稿（ソーシャルクラウドソーシング）データ**
+   * 「この車両は今空いている」「この駅でエレベーターが工事中」などのユーザーのクチコミ投稿を蓄積し、推定ロジックを補正するシステム。
+
+---
+
+## 📐 Vercel デプロイ構成
+
+本アプリはNext.jsの標準的な静的エクスポートまたはSSR（サーバーサイドレンダリング）に対応しており、Vercelのリポジトリ連携を利用することで、GitHubにプッシュするだけで数分でグローバルにデプロイ可能です。
+
+* 特段の追加設定なしで、Vercelのインポート機能からデプロイが完了します。
+* 必要に応じて `.env.production` に外部APIキーなどを配置してビルドできます。
